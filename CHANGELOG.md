@@ -38,6 +38,7 @@
 
 ### Fixed
 
+- Fail managed worktree setup before child launch when a required shared `node_modules` link cannot be created and verified, while preserving absent sources and preexisting destinations (#2283).
 - Allow checked writers to explicitly preserve a host-bound staged index while still rejecting child-created index changes (#2280).
 
 - Preserve the main watchdog's user scope across session compaction while clearing temporary activity state. Thanks to [@nimeetshah0](https://github.com/nimeetshah0) for #2263.
