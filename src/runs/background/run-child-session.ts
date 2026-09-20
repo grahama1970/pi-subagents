@@ -74,6 +74,8 @@ export type StepSteerHandler = (request: SteerRequest) => Promise<SteerDelivery>
 export interface RunChildSessionInput {
 	factory: ChildSessionFactory;
 	launch: InProcessChildLaunch;
+	/** Fail-closed host gate executed before the child provider is constructed. */
+	beforeDispatch?: () => void | Promise<void>;
 	/** Prompt text; the task with its `Task:` prefix. */
 	prompt: string;
 	childWatchdog?: ChildWatchdogConfig;
@@ -645,6 +647,7 @@ export function runChildSession(input: RunChildSessionInput): Promise<RunChildSe
 
 		void (async () => {
 			try {
+				await input.beforeDispatch?.();
 				const createInput = createReportedChildSessionInput(input.launch, input.transcriptWriter);
 				const created = await input.factory.create(createInput);
 				if (settled) {

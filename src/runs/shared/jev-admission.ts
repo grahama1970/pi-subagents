@@ -35,6 +35,10 @@ type Offer = Record<string, unknown>;
 const MAX_EVIDENCE_REASON_LENGTH = 160;
 
 /** Per-workflow policy is explicit and namespaced; absence preserves optional legacy behavior. */
+export function hasJevAdmissionBinding(bindings: unknown): boolean {
+	return Boolean(bindings && typeof bindings === "object" && !Array.isArray(bindings) && (bindings as Record<string, unknown>)[JEV_BINDING]);
+}
+
 export function resolveJevAdmissionMode(bindings: unknown): JevAdmissionMode {
 	if (!bindings || typeof bindings !== "object" || Array.isArray(bindings)) return "optional";
 	const value = (bindings as Record<string, unknown>)[JEV_BINDING];
