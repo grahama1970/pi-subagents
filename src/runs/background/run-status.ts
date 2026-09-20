@@ -615,7 +615,9 @@ export function inspectSubagentStatus(params: RunStatusParams, deps: RunStatusDe
 			let hasExternalJobFollowUpHint = false;
 			for (const [index, step] of (status.steps ?? []).entries()) {
 				const stepActivityText = step.status === "running" ? formatActivityLabel(step.lastActivityAt, step.activityState) : undefined;
-				const modelThinking = formatModelThinking(step.model, step.thinking);
+				const childStatus = !step.model && step.runId ? readStatus(path.join(asyncDirRoot, step.runId)) : undefined;
+				const childStep = childStatus?.steps?.length === 1 ? childStatus.steps[0] : undefined;
+				const modelThinking = formatModelThinking(step.model ?? childStep?.model, step.thinking ?? childStep?.thinking);
 				const modelText = modelThinking ? ` (${modelThinking})` : "";
 				const steeringText = formatSteeringSummary(step);
 				const steeringSuffix = steeringText ? `, steering: ${steeringText}` : "";

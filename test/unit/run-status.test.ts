@@ -1384,8 +1384,17 @@ describe("async run status inspection", () => {
 			const firstSession = path.join(root, "review.jsonl");
 			const secondSession = path.join(root, "writer.jsonl");
 			fs.mkdirSync(asyncDir, { recursive: true });
+			fs.mkdirSync(path.join(asyncRoot, "child-review"), { recursive: true });
 			fs.writeFileSync(firstSession, "", "utf-8");
 			fs.writeFileSync(secondSession, "", "utf-8");
+			fs.writeFileSync(path.join(asyncRoot, "child-review", "status.json"), JSON.stringify({
+				runId: "child-review",
+				mode: "single",
+				state: "failed",
+				startedAt: 100,
+				lastUpdate: 200,
+				steps: [{ agent: "reviewer", status: "failed", model: "openai-codex/gpt-5.5", thinking: "high" }],
+			}, null, 2), "utf-8");
 			fs.writeFileSync(path.join(asyncDir, "status.json"), JSON.stringify({
 				runId: "workflow-parent",
 				mode: "workflow",
@@ -1400,6 +1409,7 @@ describe("async run status inspection", () => {
 
 			const result = inspectSubagentStatus({ id: "workflow-parent" }, { asyncDirRoot: asyncRoot, resultsDir: path.join(root, "results") });
 			const text = textContent(result);
+			assert.match(text, /Workflow child review: reviewer failed \(gpt-5\.5 · thinking high\)/);
 			assert.match(text, /Revive workflow child 'review': subagent\(\{ action: "resume", id: "child-review", message: "\.\.\." \}\)/);
 			assert.match(text, /Revive workflow child 'write': subagent\(\{ action: "resume", id: "child-write", message: "\.\.\." \}\)/);
 			assert.doesNotMatch(text, /id: "workflow-parent", index:/);
